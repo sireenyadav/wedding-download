@@ -8,8 +8,12 @@ TARGET_DIR="/storage/F8FCADDDFCAD9702/Android/data/com.termux/files/Wedding_Back
 SONAL_ROOT_ID="1UTqkkQr7SwXAZanU0Yy9yiQnsbDlYSUV"
 ROSHAN_ROOT_ID="11T1irnWdZzj1G16Q_JpzdHGHzK6rVIOf"
 
-# --local-no-set-modtime is the absolute kill-switch for Android FAT32/exFAT timestamp restrictions
-FLAGS="--checksum --transfers 4 --retries 15 --retries-sleep 5s -P --stats 1s --local-no-set-modtime --drive-chunk-size 64M"
+# Force rclone to completely ignore all local timestamp operations at the environment level
+export RCLONE_LOCAL_NO_SET_MODTIME=true
+export RCLONE_LOCAL_NO_CHECK_UPDATED=true
+
+# --inplace: Writes directly to the final file name, bypassing the .partial file step which triggers the chtimes crash
+FLAGS="--checksum --transfers 4 --retries 15 --retries-sleep 5s -P --stats 1s --inplace --drive-chunk-size 64M"
 
 # ==========================================
 # INITIALIZATION
