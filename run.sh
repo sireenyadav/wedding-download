@@ -1,19 +1,18 @@
 #!/bin/bash
 
 # ==========================================
-# CONFIGURATION (Targeting Partition 4)
+# CONFIGURATION
 # ==========================================
 TARGET_DIR="/storage/F8FCADDDFCAD9702/Android/data/com.termux/files/Wedding_Backup"
 
 SONAL_ROOT_ID="1UTqkkQr7SwXAZanU0Yy9yiQnsbDlYSUV"
 ROSHAN_ROOT_ID="11T1irnWdZzj1G16Q_JpzdHGHzK6rVIOf"
 
-# -P: Displays real-time progress bars for active files
-# --stats 1s: Forces the terminal to update the download speed and ETA every single second
-FLAGS="--drive-shared-with-me --checksum --transfers 4 --retries 15 --retries-sleep 5s -P --stats 1s"
+# Removed --drive-shared-with-me to prevent path resolution conflicts
+FLAGS="--checksum --transfers 4 --retries 15 --retries-sleep 5s -P --stats 1s"
 
 # ==========================================
-# INITIALIZATION & DEPENDENCY CHECK
+# INITIALIZATION
 # ==========================================
 mkdir -p "$TARGET_DIR"
 
@@ -33,14 +32,14 @@ echo ""
 # BACKUP EXECUTION QUEUE
 # ==========================================
 echo "================================================================"
-echo " STARTING: SONAL WEDDING (PHOTOS SUBDIRECTORY)                  "
+echo " STARTING: SONAL WEDDING (DIRECT ID TARGETING)                  "
 echo "================================================================"
-rclone copy "gdrive,root_folder_id=$SONAL_ROOT_ID:Photos" "$TARGET_DIR/Sonal_Wedding" $FLAGS
+rclone copy "gdrive,root_folder_id=$SONAL_ROOT_ID:" "$TARGET_DIR/Sonal_Wedding" $FLAGS
 
 echo -e "\n================================================================"
-echo " STARTING: ROSHAN WEDDING (PHOTOS SUBDIRECTORY)                 "
+echo " STARTING: ROSHAN WEDDING (DIRECT ID TARGETING)                 "
 echo "================================================================"
-rclone copy "gdrive,root_folder_id=$ROSHAN_ROOT_ID:Photos" "$TARGET_DIR/Roshan_Wedding" $FLAGS
+rclone copy "gdrive,root_folder_id=$ROSHAN_ROOT_ID:" "$TARGET_DIR/Roshan_Wedding" $FLAGS
 
 echo -e "\n================================================================"
 echo " PROCESS COMPLETE: ALL PHOTOS VERIFIED BY MD5 CHECKSUMS         "
