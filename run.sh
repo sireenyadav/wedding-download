@@ -8,9 +8,8 @@ TARGET_DIR="/storage/F8FCADDDFCAD9702/Android/data/com.termux/files/Wedding_Back
 SONAL_ROOT_ID="1UTqkkQr7SwXAZanU0Yy9yiQnsbDlYSUV"
 ROSHAN_ROOT_ID="11T1irnWdZzj1G16Q_JpzdHGHzK6rVIOf"
 
-# --no-update-modtime bypasses the Android "operation not permitted" chtimes error
-# --drive-chunk-size 64M fixes the network speed bottleneck on tablet streams
-FLAGS="--checksum --transfers 4 --retries 15 --retries-sleep 5s -P --stats 1s --no-update-modtime --drive-chunk-size 64M"
+# --local-no-set-modtime is the absolute kill-switch for Android FAT32/exFAT timestamp restrictions
+FLAGS="--checksum --transfers 4 --retries 15 --retries-sleep 5s -P --stats 1s --local-no-set-modtime --drive-chunk-size 64M"
 
 # ==========================================
 # INITIALIZATION
