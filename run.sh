@@ -8,8 +8,9 @@ TARGET_DIR="/storage/F8FCADDDFCAD9702/Android/data/com.termux/files/Wedding_Back
 SONAL_ROOT_ID="1UTqkkQr7SwXAZanU0Yy9yiQnsbDlYSUV"
 ROSHAN_ROOT_ID="11T1irnWdZzj1G16Q_JpzdHGHzK6rVIOf"
 
-# Removed --drive-shared-with-me to prevent path resolution conflicts
-FLAGS="--checksum --transfers 4 --retries 15 --retries-sleep 5s -P --stats 1s"
+# --no-update-modtime bypasses the Android "operation not permitted" chtimes error
+# --drive-chunk-size 64M fixes the network speed bottleneck on tablet streams
+FLAGS="--checksum --transfers 4 --retries 15 --retries-sleep 5s -P --stats 1s --no-update-modtime --drive-chunk-size 64M"
 
 # ==========================================
 # INITIALIZATION
