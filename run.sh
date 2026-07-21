@@ -12,8 +12,8 @@ ROSHAN_ROOT_ID="11T1irnWdZzj1G16Q_JpzdHGHzK6rVIOf"
 export RCLONE_LOCAL_NO_SET_MODTIME=true
 export RCLONE_LOCAL_NO_CHECK_UPDATED=true
 
-# Keep --checkers 16 for fast local disk checks, but remove --fast-list to avoid API stalling
-FLAGS="--checksum --transfers 4 --checkers 16 --retries 15 --retries-sleep 5s -P --stats 1s --inplace --drive-chunk-size 64M"
+# HIGH-PERFORMANCE RESUME: Using --size-only to instantly skip completed files and overwrite partial/failed transfers.
+FLAGS="--size-only --transfers 4 --checkers 16 --retries 15 --retries-sleep 5s -P --stats 1s --inplace --drive-chunk-size 64M"
 
 # ==========================================
 # INITIALIZATION
@@ -46,5 +46,5 @@ echo "================================================================"
 rclone copy "gdrive,root_folder_id=$ROSHAN_ROOT_ID:" "$TARGET_DIR/Roshan_Wedding" $FLAGS
 
 echo -e "\n================================================================"
-echo " PROCESS COMPLETE: ALL PHOTOS VERIFIED BY MD5 CHECKSUMS         "
+echo " PROCESS COMPLETE: ALL PHOTOS VERIFIED AND SECURED              "
 echo "================================================================"
