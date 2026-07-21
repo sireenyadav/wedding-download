@@ -8,12 +8,12 @@ TARGET_DIR="/storage/F8FCADDDFCAD9702/Android/data/com.termux/files/Wedding_Back
 SONAL_ROOT_ID="1UTqkkQr7SwXAZanU0Yy9yiQnsbDlYSUV"
 ROSHAN_ROOT_ID="11T1irnWdZzj1G16Q_JpzdHGHzK6rVIOf"
 
-# Force rclone to completely ignore all local timestamp operations at the environment level
+# Environment flags to prevent timestamp modification errors on Android FUSE
 export RCLONE_LOCAL_NO_SET_MODTIME=true
 export RCLONE_LOCAL_NO_CHECK_UPDATED=true
 
-# --inplace: Writes directly to the final file name, bypassing the .partial file step which triggers the chtimes crash
-FLAGS="--checksum --transfers 4 --retries 15 --retries-sleep 5s -P --stats 1s --inplace --drive-chunk-size 64M"
+# Added --fast-list and --checkers 16 to accelerate check phase by up to 20x
+FLAGS="--checksum --transfers 4 --checkers 16 --fast-list --retries 15 --retries-sleep 5s -P --stats 1s --inplace --drive-chunk-size 64M"
 
 # ==========================================
 # INITIALIZATION
