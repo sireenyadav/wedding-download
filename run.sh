@@ -3,47 +3,44 @@
 # ==========================================
 # CONFIGURATION
 # ==========================================
-TARGET_DIR="/storage/F8FCADDDFCAD9702/Android/data/com.termux/files/Wedding_Backup"
+# Sonal's completed directory (Left on the original partition)
+SONAL_DIR="/storage/F8FCADDDFCAD9702/Android/data/com.termux/files/Wedding_Backup/Sonal_Wedding"
+
+# Roshan's directory (Targeted to the 88GB free partition to keep it intact)
+ROSHAN_DIR="/storage/7AF87657F876119D/Android/data/com.termux/files/Wedding_Backup/Roshan_Wedding"
 
 SONAL_ROOT_ID="1UTqkkQr7SwXAZanU0Yy9yiQnsbDlYSUV"
 ROSHAN_ROOT_ID="11T1irnWdZzj1G16Q_JpzdHGHzK6rVIOf"
 
-# Environment flags to prevent timestamp modification errors on Android FUSE
 export RCLONE_LOCAL_NO_SET_MODTIME=true
 export RCLONE_LOCAL_NO_CHECK_UPDATED=true
 
-# HIGH-PERFORMANCE RESUME: Using --size-only to instantly skip completed files and overwrite partial/failed transfers.
 FLAGS="--size-only --transfers 4 --checkers 16 --retries 15 --retries-sleep 5s -P --stats 1s --inplace --drive-chunk-size 64M"
 
 # ==========================================
 # INITIALIZATION
 # ==========================================
-mkdir -p "$TARGET_DIR"
-
-if ! command -v rclone &> /dev/null; then
-    echo "[-] Rclone missing. Installing package..."
-    pkg update && pkg install rclone -y
-fi
+mkdir -p "$SONAL_DIR"
+mkdir -p "$ROSHAN_DIR"
 
 echo "================================================================"
-echo " STORAGE AUDIT: TARGETING PARTITION F8FCADDDFCAD9702            "
+echo " STORAGE AUDIT                                                  "
 echo "================================================================"
-df -h "$TARGET_DIR"
+df -h | grep /storage/
 echo "================================================================"
-echo ""
 
 # ==========================================
 # BACKUP EXECUTION QUEUE
 # ==========================================
-echo "================================================================"
+echo -e "\n================================================================"
 echo " STARTING: SONAL WEDDING (DIRECT ID TARGETING)                  "
 echo "================================================================"
-rclone copy "gdrive,root_folder_id=$SONAL_ROOT_ID:" "$TARGET_DIR/Sonal_Wedding" $FLAGS
+rclone copy "gdrive,root_folder_id=$SONAL_ROOT_ID:" "$SONAL_DIR" $FLAGS
 
 echo -e "\n================================================================"
-echo " STARTING: ROSHAN WEDDING (DIRECT ID TARGETING)                 "
+echo " STARTING: ROSHAN WEDDING (88GB PARTITION TARGET)               "
 echo "================================================================"
-rclone copy "gdrive,root_folder_id=$ROSHAN_ROOT_ID:" "$TARGET_DIR/Roshan_Wedding" $FLAGS
+rclone copy "gdrive,root_folder_id=$ROSHAN_ROOT_ID:" "$ROSHAN_DIR" $FLAGS
 
 echo -e "\n================================================================"
 echo " PROCESS COMPLETE: ALL PHOTOS VERIFIED AND SECURED              "
