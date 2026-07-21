@@ -3,10 +3,10 @@
 # ==========================================
 # CONFIGURATION
 # ==========================================
-# Sonal's completed directory (Left on the original partition)
+# Sonal's completed directory (Original Partition)
 SONAL_DIR="/storage/F8FCADDDFCAD9702/Android/data/com.termux/files/Wedding_Backup/Sonal_Wedding"
 
-# Roshan's directory (Targeted to the 88GB free partition to keep it intact)
+# Roshan's directory (Clean target on the 88GB partition)
 ROSHAN_DIR="/storage/7AF87657F876119D/Android/data/com.termux/files/Wedding_Backup/Roshan_Wedding"
 
 SONAL_ROOT_ID="1UTqkkQr7SwXAZanU0Yy9yiQnsbDlYSUV"
@@ -33,12 +33,12 @@ echo "================================================================"
 # BACKUP EXECUTION QUEUE
 # ==========================================
 echo -e "\n================================================================"
-echo " STARTING: SONAL WEDDING (DIRECT ID TARGETING)                  "
+echo " STARTING: SONAL WEDDING (VERIFYING COMPLETED)                  "
 echo "================================================================"
 rclone copy "gdrive,root_folder_id=$SONAL_ROOT_ID:" "$SONAL_DIR" $FLAGS
 
 echo -e "\n================================================================"
-echo " STARTING: ROSHAN WEDDING (88GB PARTITION TARGET)               "
+echo " STARTING: ROSHAN WEDDING (TARGETING 88GB PARTITION)            "
 echo "================================================================"
 rclone copy "gdrive,root_folder_id=$ROSHAN_ROOT_ID:" "$ROSHAN_DIR" $FLAGS
 
