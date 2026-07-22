@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # ==========================================
-# CONFIGURATION
+# CONFIGURATION (Multi-Partition Targets)
 # ==========================================
-TARGET_DIR="/storage/7AF87657F876119D/Android/data/com.termux/files/Wedding_Backup/Roshan_Wedding"
-REPORT_FILE="$TARGET_DIR/orphan_report.txt"
+SONAL_DIR="/storage/F8FCADDDFCAD9702/Android/data/com.termux/files/Wedding_Backup/Sonal_Wedding"
+ROSHAN_DIR="/storage/7AF87657F876119D/Android/data/com.termux/files/Wedding_Backup/Roshan_Wedding"
+REPORT_FILE="orphan_report.txt"
 CPP_FILE="nef_verifier.cpp"
 BIN_FILE="nef_verifier"
 
@@ -12,7 +13,7 @@ BIN_FILE="nef_verifier"
 # INITIALIZATION & COMPILER CHECK
 # ==========================================
 echo "================================================================"
-echo " VERIFICATION ENGINE: INITIALIZING ENVIRONMENT                  "
+echo " UNIFIED VERIFICATION ENGINE: INITIALIZING                      "
 echo "================================================================"
 
 if ! command -v clang++ &> /dev/null; then
@@ -25,7 +26,7 @@ fi
 # ==========================================
 cat << 'EOF' > "$CPP_FILE"
 // nef_verifier.cpp
-// 100% Read-Only FUSE-aware .NEF / .JPG verification engine.
+// 100% Read-Only multi-directory .NEF / .JPG verification engine.
 
 #include <filesystem>
 #include <unordered_set>
@@ -119,24 +120,29 @@ static void process_directory(const fs::path& dir, std::ofstream& log_file) {
 
 int main(int argc, char** argv) {
     if (argc < 3) {
-        std::fprintf(stderr, "Usage: %s <target_directory> <output_log.txt>\n", argv[0]);
+        std::fprintf(stderr, "Usage: %s <output_log.txt> <target_dir_1> [target_dir_2 ...]\n", argv[0]);
         return 1;
     }
 
-    std::error_code ec;
-    const fs::path root(argv[1]);
-    if (!fs::is_directory(root, ec)) {
-        std::fprintf(stderr, "Error: '%s' is not a directory.\n", argv[1]);
-        return 1;
-    }
-
-    std::ofstream log_file(argv[2], std::ios::trunc);
+    const fs::path report_path(argv[1]);
+    std::ofstream log_file(report_path, std::ios::trunc);
     if (!log_file.is_open()) {
-        std::fprintf(stderr, "Error: Could not open output file '%s'\n", argv[2]);
+        std::fprintf(stderr, "Error: Could not open output file '%s'\n", argv[1]);
         return 1;
     }
 
-    process_directory(root, log_file);
+    for (int i = 2; i < argc; ++i) {
+        std::error_code ec;
+        const fs::path root(argv[i]);
+        if (!fs::is_directory(root, ec)) {
+            std::fprintf(stderr, "\nWarning: Directory unreachable or missing: '%s'\n", argv[i]);
+            ++g_errors;
+            continue;
+        }
+        std::fprintf(stderr, "\nScanning target: %s\n", argv[i]);
+        process_directory(root, log_file);
+    }
+
     log_file.close();
     return 0;
 }
@@ -157,13 +163,12 @@ fi
 # EXECUTION
 # ==========================================
 echo -e "\n================================================================"
-echo " STARTING AUDIT PASS: SCANNING FOR UNPAIRED PHOTOS             "
+echo " STARTING AUDIT PASS: SCANNING ALL PARTITIONS FOR UNPAIRED PHOTOS"
 echo "================================================================"
 
-./"$BIN_FILE" "$TARGET_DIR" "$REPORT_FILE"
+./"$BIN_FILE" "$REPORT_FILE" "$SONAL_DIR" "$ROSHAN_DIR"
 
 echo -e "\n\n================================================================"
 echo " AUDIT COMPLETE                                                 "
 echo "================================================================"
-echo "Report written to: $REPORT_FILE"
-echo "Run 'cat $REPORT_FILE' to review unpaired files."
+echo "Report written to: $(pwd)/$REPORT_FILE"
