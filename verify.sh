@@ -13,7 +13,7 @@ BIN_FILE="nef_verifier"
 # INITIALIZATION & COMPILER CHECK
 # ==========================================
 echo "================================================================"
-echo " UNIFIED VERIFICATION ENGINE: INITIALIZING                      "
+echo " STORAGE AUDIT ENGINE: INITIALIZING                             "
 echo "================================================================"
 
 if ! command -v clang++ &> /dev/null; then
@@ -22,11 +22,11 @@ if ! command -v clang++ &> /dev/null; then
 fi
 
 # ==========================================
-# EMBEDDED C++ VERIFIER SOURCE
+# EMBEDDED C++ AUDIT SOURCE
 # ==========================================
 cat << 'EOF' > "$CPP_FILE"
 // nef_verifier.cpp
-// 100% Read-Only multi-directory .NEF / .JPG verification engine.
+// Multi-directory .NEF verification & space calculation engine.
 
 #include <filesystem>
 #include <unordered_set>
@@ -44,6 +44,8 @@ namespace fs = std::filesystem;
 static std::uint64_t g_scanned = 0;
 static std::uint64_t g_missing_jpg = 0;
 static std::uint64_t g_missing_nef = 0;
+static std::uint64_t g_nef_count = 0;
+static std::uint64_t g_nef_bytes = 0;
 static std::uint64_t g_errors  = 0;
 
 static inline std::string to_lower(std::string s) {
@@ -53,10 +55,10 @@ static inline std::string to_lower(std::string s) {
 
 static inline void print_counter() {
     std::fprintf(stderr,
-        "\rScanned: %llu | Missing JPGs: %llu | Missing NEFs: %llu | Errors: %llu   ",
+        "\rScanned: %llu | NEF Count: %llu | NEF Size: %.2f GB | Errors: %llu   ",
         static_cast<unsigned long long>(g_scanned),
-        static_cast<unsigned long long>(g_missing_jpg),
-        static_cast<unsigned long long>(g_missing_nef),
+        static_cast<unsigned long long>(g_nef_count),
+        static_cast<double>(g_nef_bytes) / (1024.0 * 1024.0 * 1024.0),
         static_cast<unsigned long long>(g_errors));
     std::fflush(stderr);
 }
@@ -93,6 +95,11 @@ static void process_directory(const fs::path& dir, std::ofstream& log_file) {
             jpg_stems.insert(stem);
         } else if (ex == ".nef") {
             nef_stems.insert(stem);
+            std::uint64_t fsize = e.file_size(tmp_ec);
+            if (!tmp_ec) {
+                g_nef_bytes += fsize;
+                ++g_nef_count;
+            }
         }
     }
 
@@ -144,6 +151,13 @@ int main(int argc, char** argv) {
     }
 
     log_file.close();
+
+    double size_gb = static_cast<double>(g_nef_bytes) / (1024.0 * 1024.0 * 1024.0);
+    std::fprintf(stderr, "\n\n================================================================");
+    std::fprintf(stderr, "\n TOTAL .NEF FILES FOUND : %llu", static_cast<unsigned long long>(g_nef_count));
+    std::fprintf(stderr, "\n TOTAL SPACE OCCUPIED   : %.2f GB (%llu bytes)", size_gb, static_cast<unsigned long long>(g_nef_bytes));
+    std::fprintf(stderr, "\n================================================================");
+
     return 0;
 }
 EOF
@@ -151,7 +165,7 @@ EOF
 # ==========================================
 # COMPILATION
 # ==========================================
-echo "[+] Compiling C++ verification engine with -O3 ARM optimizations..."
+echo "[+] Compiling C++ audit engine with -O3 ARM optimizations..."
 clang++ -O3 -std=c++17 "$CPP_FILE" -o "$BIN_FILE"
 
 if [ $? -ne 0 ]; then
@@ -163,12 +177,9 @@ fi
 # EXECUTION
 # ==========================================
 echo -e "\n================================================================"
-echo " STARTING AUDIT PASS: SCANNING ALL PARTITIONS FOR UNPAIRED PHOTOS"
+echo " STARTING AUDIT PASS: CALCULATING .NEF STORAGE FOOTPRINT       "
 echo "================================================================"
 
 ./"$BIN_FILE" "$REPORT_FILE" "$SONAL_DIR" "$ROSHAN_DIR"
 
-echo -e "\n\n================================================================"
-echo " AUDIT COMPLETE                                                 "
-echo "================================================================"
-echo "Report written to: $(pwd)/$REPORT_FILE"
+echo -e "\n\nReport written to: $(pwd)/$REPORT_FILE"
