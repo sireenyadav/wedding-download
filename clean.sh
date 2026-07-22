@@ -3,7 +3,8 @@
 # ==========================================
 # CONFIGURATION
 # ==========================================
-TARGET_DIR="/storage/7AF87657F876119D/Android/data/com.termux/files/Wedding_Backup/Roshan_Wedding"
+SONAL_DIR="/storage/F8FCADDDFCAD9702/Android/data/com.termux/files/Wedding_Backup/Sonal_Wedding"
+ROSHAN_DIR="/storage/7AF87657F876119D/Android/data/com.termux/files/Wedding_Backup/Roshan_Wedding"
 CPP_FILE="nef_cleaner.cpp"
 BIN_FILE="nef_cleaner"
 
@@ -11,7 +12,7 @@ BIN_FILE="nef_cleaner"
 # INITIALIZATION & COMPILER CHECK
 # ==========================================
 echo "================================================================"
-echo " DELETION ENGINE: INITIALIZING ENVIRONMENT                      "
+echo " UNIFIED DELETION ENGINE: INITIALIZING                          "
 echo "================================================================"
 
 if ! command -v clang++ &> /dev/null; then
@@ -24,8 +25,7 @@ fi
 # ==========================================
 cat << 'EOF' > "$CPP_FILE"
 // nef_cleaner.cpp
-// Single-threaded, FUSE-aware .NEF redundancy cleaner.
-// Deletes a .NEF only when an exact-stem .JPG/.JPEG twin exists in the SAME directory.
+// Multi-directory .NEF redundancy cleaner.
 
 #include <filesystem>
 #include <unordered_set>
@@ -119,19 +119,22 @@ static void process_directory(const fs::path& dir) {
 
 int main(int argc, char** argv) {
     if (argc < 2) {
-        std::fprintf(stderr, "Usage: %s <root_dir>\n", argv[0]);
+        std::fprintf(stderr, "Usage: %s <target_dir_1> [target_dir_2 ...]\n", argv[0]);
         return 1;
     }
 
-    std::error_code ec;
-    const fs::path root(argv[1]);
-    if (!fs::is_directory(root, ec)) {
-        std::fprintf(stderr, "Error: '%s' is not a directory: %s\n",
-                     argv[1], ec.message().c_str());
-        return 1;
+    for (int i = 1; i < argc; ++i) {
+        std::error_code ec;
+        const fs::path root(argv[i]);
+        if (!fs::is_directory(root, ec)) {
+            std::fprintf(stderr, "\nWarning: Directory unreachable or missing: '%s'\n", argv[i]);
+            ++g_errors;
+            continue;
+        }
+        std::fprintf(stderr, "\nPurging target: %s\n", argv[i]);
+        process_directory(root);
     }
 
-    process_directory(root);
     std::fprintf(stderr, "\n");
     return (g_errors == 0) ? 0 : 2;
 }
@@ -152,10 +155,10 @@ fi
 # EXECUTION
 # ==========================================
 echo -e "\n================================================================"
-echo " STARTING PURGE PASS: DELETING REDUNDANT .NEF FILES             "
+echo " STARTING UNIFIED PURGE PASS ACROSS ALL PARTITIONS              "
 echo "================================================================"
 
-./"$BIN_FILE" "$TARGET_DIR"
+./"$BIN_FILE" "$SONAL_DIR" "$ROSHAN_DIR"
 
 echo -e "\n================================================================"
 echo " PURGE COMPLETE. CHECKING RECLAIMED STORAGE...                  "
